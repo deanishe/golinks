@@ -33,8 +33,12 @@ profile:
 bench:
 	@go test -v -bench ./...
 
-test:
-	@go test -v -cover -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... -race ./...
+test: build
+	@go test -v \
+		-cover -coverprofile=coverage.txt -covermode=atomic \
+		-coverpkg=$(shell go list) \
+		-race \
+		.
 
 clean:
 	@git clean -f -d -X

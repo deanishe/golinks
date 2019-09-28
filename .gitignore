@@ -2,7 +2,9 @@
 *.db
 dist
 *.bak
-golinks
-golinks-*
-rice-box.go
 .idea/
+
+/golinks
+/golinks-*
+/rice-box.go
+/coverage.txt

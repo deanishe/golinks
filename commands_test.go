@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
@@ -88,13 +87,12 @@ func TestListCommand(t *testing.T) {
 	assert.Nil(err)
 
 	body := w.Body.String()
-	cmds := strings.Split(body, "\n")
-	assert.Contains(cmds, "ping")
-	assert.Contains(cmds, "list")
-	assert.Contains(cmds, "help")
-	assert.Contains(cmds, "g")
-	assert.Contains(cmds, "yt")
-	assert.Contains(cmds, "go")
+	assert.Contains(body, "ping")
+	assert.Contains(body, "list")
+	assert.Contains(body, "help")
+	assert.Contains(body, "g")
+	assert.Contains(body, "yt")
+	assert.Contains(body, "go")
 }
 
 func TestHelpCommand(t *testing.T) {

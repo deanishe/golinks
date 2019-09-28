@@ -83,36 +83,7 @@ func (p List) Desc() string {
 
 // Exec ...
 func (p List) Exec(w http.ResponseWriter, r *http.Request, args []string) error {
-	var bs, cs []string
-
-	prefix := []byte("bookmark_")
-	err := db.Scan(prefix, func(key []byte) error {
-		val, err := db.Get(key)
-		if err != nil {
-			return err
-		}
-		name := strings.TrimPrefix(string(key), "bookmark_")
-		bs = append(bs, fmt.Sprintf("%s => %s", name, val))
-		return nil
-	})
-	if err != nil {
-		log.Printf("error reading list of bookmarks: %s", err)
-	}
-
-	for k := range commands {
-		cs = append(cs, k)
-	}
-
-	w.Write(
-		[]byte(
-			fmt.Sprintf(
-				"Bookmarks:\n\n%s\n\nCommands:\n\n%s",
-				strings.Join(bs, "\n"),
-				strings.Join(cs, "\n"),
-			),
-		),
-	)
-
+	http.Redirect(w, r, "/list", http.StatusFound)
 	return nil
 }
 

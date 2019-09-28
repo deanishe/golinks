@@ -1,0 +1,43 @@
+{{define "content"}}
+<section class="container">
+  <div class="columns">
+    <div class="column">
+      <h2 class="mt-2 mb-1">Bookmarks</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th class="text-left">URL</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ range .Bookmarks }}
+            <tr>
+              <th><code>{{ .Name }}</code></th>
+              <td>{{ .URL }}</td>
+            </tr>
+          {{ end }}
+        </tbody>
+      </table>
+
+      <h2 class="mt-2 pt-2 mb-1">Commands</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th class="text-left">Usage</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ range .Commands }}
+            <tr>
+              <th style="vertical-align: baseline;"><pre><code>{{ .Name }}</code></pre></th>
+              <td><pre>{{ .Desc }}</pre></td>
+            </tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{{end}}

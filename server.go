@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"sort"
 	"strings"
 
 	// Logging
@@ -16,7 +17,7 @@ import (
 	"github.com/rcrowley/go-metrics/exp"
 	"github.com/thoas/stats"
 
-	"github.com/GeertJohan/go.rice"
+	rice "github.com/GeertJohan/go.rice"
 	"github.com/NYTimes/gziphandler"
 	"github.com/julienschmidt/httprouter"
 )
@@ -153,6 +154,48 @@ func (s *Server) HelpHandler() httprouter.Handle {
 	}
 }
 
+// ListHandler ...
+func (s *Server) ListHandler() httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		s.counters.Inc("n_list")
+
+		var (
+			bk  []Bookmark
+			cmd []Command
+		)
+
+		prefix := []byte("bookmark_")
+		err := db.Scan(prefix, func(key []byte) error {
+			val, err := db.Get(key)
+			if err != nil {
+				return err
+			}
+			name := strings.TrimPrefix(string(key), "bookmark_")
+			bk = append(bk, Bookmark{name, string(val)})
+			// bs = append(bs, fmt.Sprintf("%s => %s", name, val))
+			return nil
+		})
+		if err != nil {
+			log.Printf("error reading list of bookmarks: %s", err)
+		}
+
+		var names []string
+		for k := range commands {
+			names = append(names, k)
+		}
+		sort.Sort(sort.StringSlice(names))
+		for _, name := range names {
+			cmd = append(cmd, commands[name])
+		}
+
+		data := map[string]interface{}{
+			"Bookmarks": bk,
+			"Commands":  cmd,
+		}
+		s.render("list", w, data)
+	}
+}
+
 // OpenSearchHandler ...
 func (s *Server) OpenSearchHandler() httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -204,6 +247,7 @@ func (s *Server) initRoutes() {
 	s.router.GET("/", s.IndexHandler())
 	s.router.POST("/", s.IndexHandler())
 	s.router.GET("/help", s.HelpHandler())
+	s.router.GET("/list", s.ListHandler())
 	s.router.GET("/opensearch.xml", s.OpenSearchHandler())
 }
 
@@ -238,8 +282,13 @@ func NewServer(bind string, config Config) *Server {
 	template.Must(helpTemplate.Parse(box.MustString("help.html")))
 	template.Must(helpTemplate.Parse(box.MustString("base.html")))
 
+	listTemplate := template.New("list")
+	template.Must(listTemplate.Parse(box.MustString("list.html")))
+	template.Must(listTemplate.Parse(box.MustString("base.html")))
+
 	server.templates.Add("index", indexTemplate)
 	server.templates.Add("help", helpTemplate)
+	server.templates.Add("list", listTemplate)
 
 	server.initRoutes()
 

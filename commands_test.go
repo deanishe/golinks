@@ -86,13 +86,11 @@ func TestListCommand(t *testing.T) {
 	err = cmd.Exec(w, r, args)
 	assert.Nil(err)
 
-	body := w.Body.String()
-	assert.Contains(body, "ping")
-	assert.Contains(body, "list")
-	assert.Contains(body, "help")
-	assert.Contains(body, "g")
-	assert.Contains(body, "yt")
-	assert.Contains(body, "go")
+	assert.Condition(func() bool {
+		return w.Code >= http.StatusMultipleChoices &&
+			w.Code <= http.StatusTemporaryRedirect
+	})
+	assert.Equal(w.Header().Get("Location"), "/list")
 }
 
 func TestHelpCommand(t *testing.T) {

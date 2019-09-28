@@ -172,7 +172,6 @@ func (s *Server) ListHandler() httprouter.Handle {
 			}
 			name := strings.TrimPrefix(string(key), "bookmark_")
 			bk = append(bk, Bookmark{name, string(val)})
-			// bs = append(bs, fmt.Sprintf("%s => %s", name, val))
 			return nil
 		})
 		if err != nil {

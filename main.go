@@ -28,11 +28,11 @@ func main() {
 	flag.BoolVar(&version, "v", false, "display version information")
 
 	flag.StringVar(&config, "config", "", "config file")
-	flag.StringVar(&dbpath, "dbpath", "search.db", "Database path")
-	flag.StringVar(&title, "title", "Search", "OpenSearch Title")
+	flag.StringVar(&dbpath, "dbpath", "search.db", "database path")
+	flag.StringVar(&title, "title", "Search", "OpenSearch title")
 	flag.StringVar(&bind, "bind", "0.0.0.0:8000", "[int]:<port> to bind to")
-	flag.StringVar(&fqdn, "fqdn", "localhost", "FQDN for public access")
-	flag.StringVar(&url, "url", DefaultURL, "default url to redirect to")
+	flag.StringVar(&fqdn, "fqdn", "localhost:8000", "FQDN for public access")
+	flag.StringVar(&url, "url", DefaultURL, "default URL to redirect to")
 
 	flag.Parse()
 

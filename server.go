@@ -132,7 +132,7 @@ func (s *Server) IndexHandler() httprouter.Handle {
 						http.StatusInternalServerError,
 					)
 				}
-			} else if bookmark, ok := LookupBookmark(cmd); ok {
+			} else if bookmark, ok := bookmarks.Get(cmd); ok {
 				q := strings.Join(args, " ")
 				bookmark.Exec(w, r, q)
 			} else {
@@ -169,35 +169,19 @@ func (s *Server) ListHandler() httprouter.Handle {
 		s.counters.Inc("n_list")
 
 		var (
-			bk  []Bookmark
-			cmd []Command
+			cmd   []Command
+			names []string
 		)
-
-		prefix := []byte("bookmark_")
-		err := db.Scan(prefix, func(key []byte) error {
-			val, err := db.Get(key)
-			if err != nil {
-				return err
-			}
-			name := strings.TrimPrefix(string(key), "bookmark_")
-			bk = append(bk, Bookmark{name, string(val)})
-			return nil
-		})
-		if err != nil {
-			log.Printf("error reading list of bookmarks: %s", err)
-		}
-
-		var names []string
 		for k := range commands {
 			names = append(names, k)
 		}
-		sort.Sort(sort.StringSlice(names))
+		sort.Strings(names)
 		for _, name := range names {
 			cmd = append(cmd, commands[name])
 		}
 
 		data := map[string]interface{}{
-			"Bookmarks": bk,
+			"Bookmarks": bookmarks.All(),
 			"Commands":  cmd,
 		}
 		s.render("list", w, data)

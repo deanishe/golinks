@@ -101,17 +101,18 @@ All configuration options can be specified via command-line flag, environment va
 
 The available CLI flags are (as shown via `golinks -h`):
 
-|    Flag    |                                 Default                                 |                                      Description                                      |
-|------------|-------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| `-bind`    | `0:0:0:0:8000`                                                          | IP and port to bind server to.                                                        |
-| `-fqdn`    | `localhost:8000`                                                        | Web address that corresponds to bind address.                                            |
-| `-dbpath`  | `search.db`                                                             | Database to save your custom bookmarks to.                                            |
-| `-suggest` | `https://suggestqueries.google.com/complete/search?client=firefox&q=%s` | URL of autosuggest service to retrieve search suggestions from.                       |
-| `-title`   | `Search`                                                                | The OpenSearch service title (i.e. what your browser will call golinks' search).      |
-| `-url`     | `https://www.google.com/search?q=%s&btnK`                               | The URL golinks will redirect searches to by default (if no custom bookmark matches). |
-| `-config`  |                                                                         | Path to the optional configuration file (see below).                                   |
-| `-h`       |                                                                         | Show CLI help and exit.                                                                        |
-| `-v`       |                                                                         | Show golinks version number and exit.                                                 |
+|     Flag     |                                 Default                                 |                                      Description                                      |
+|--------------|-------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| `-bind`      | `0:0:0:0:8000`                                                          | IP and port to bind server to.                                                        |
+| `-fqdn`      | `localhost:8000`                                                        | Web address that corresponds to bind address.                                         |
+| `-bookmarks` | `bookmarks.toml`                                                        | TOML file to save your custom bookmarks to.                                           |
+| `-suggest`   | `https://suggestqueries.google.com/complete/search?client=firefox&q=%s` | URL of autosuggest service to retrieve search suggestions from.                       |
+| `-title`     | `Search`                                                                | The OpenSearch service title (i.e. what your browser will call golinks' search).      |
+| `-url`       | `https://www.google.com/search?q=%s&btnK`                               | The URL golinks will redirect searches to by default (if no custom bookmark matches). |
+| `-config`    |                                                                         | Path to the optional configuration file (see [below](#configuration-file)).                                  |
+| `-export`    |                                                                         | Export legacy bookmarks from a legacy database (see [Upgrading](#upgrading)).         |
+| `-h`         |                                                                         | Show CLI help and exit.                                                               |
+| `-v`         |                                                                         | Show golinks version number and exit.                                                 |
 
 ### Environment variables
 
@@ -142,11 +143,23 @@ where `/home/dave/.config/golinks/config.cfg` looks like this:
 ```
 bind 127.0.0.1:3456
 fqdn localhost:3456
-dbpath /home/dave/.config/golinks/search.db
+bookmarks /home/dave/.config/golinks/bookmarks.toml
 title Dave's Search
 url https://duckduckgo.com/?q=%s
 suggest https://duckduckgo.com/ac/?type=list&q=%s
 ```
+
+## Upgrading
+
+Version 0.0.5 and earlier stored bookmarks in a Bitcask database, instead of a TOML file. Use the `-export` flag to dump the contents of such a database to the new format:
+
+```bash
+# dump bookmarks to STDOUT
+golinks -export /path/to/search.db
+# dump bookmarks to new bookmarks file
+golinks -export /path/to/search.db > bookmarks.toml
+```
+
 
 ## Stargazers over time
 

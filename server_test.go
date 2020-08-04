@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/prologic/bitcask"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -125,9 +124,6 @@ func TestCaseInsensitive(t *testing.T) {
 func TestInvalidCommand(t *testing.T) {
 	assert := assert.New(t)
 
-	db, _ = bitcask.Open("test.db")
-	defer db.Close()
-
 	s := NewServer(":8000", Config{URL: ""})
 	w := httptest.NewRecorder()
 	r, _ := http.NewRequest("GET", "/?q=asdf", nil)
@@ -142,9 +138,6 @@ func TestInvalidCommand(t *testing.T) {
 
 func TestInvalidCommandDefaultURL(t *testing.T) {
 	assert := assert.New(t)
-
-	db, _ = bitcask.Open("test.db")
-	defer db.Close()
 
 	s := NewServer(":8000", Config{URL: DefaultURL})
 	w := httptest.NewRecorder()
@@ -166,9 +159,6 @@ func TestInvalidCommandDefaultURL(t *testing.T) {
 func TestCommandError(t *testing.T) {
 	assert := assert.New(t)
 
-	db, _ = bitcask.Open("test.db")
-	defer db.Close()
-
 	RegisterCommand("explode", Explode{})
 
 	s := NewServer(":8000", Config{})
@@ -186,11 +176,10 @@ func TestCommandError(t *testing.T) {
 func TestCommandBookmark(t *testing.T) {
 	assert := assert.New(t)
 
-	db, _ = bitcask.Open("test.db")
-	defer db.Close()
-
-	err := EnsureDefaultBookmarks()
+	var err error
+	bookmarks, err = NewBookmarks("")
 	assert.Nil(err)
+	assert.Nil(bookmarks.addDefaults())
 
 	s := NewServer(":8000", Config{})
 	w := httptest.NewRecorder()

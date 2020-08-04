@@ -1,5 +1,6 @@
 *~*
 *.db
+*.toml
 *.bak
 
 /dist

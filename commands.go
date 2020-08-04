@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -185,11 +184,7 @@ func (p Add) Exec(w http.ResponseWriter, r *http.Request, args []string) error {
 		return fmt.Errorf("expected 2 arguments got %d", len(args))
 	}
 
-	key := []byte(fmt.Sprintf("bookmark_%s", name))
-	val := []byte(url)
-
-	if err := db.Put(key, val); err != nil {
-		log.Printf("put key failed: %s", err)
+	if err := bookmarks.Add(name, url); err != nil {
 		return err
 	}
 
@@ -228,9 +223,7 @@ func (p Remove) Exec(w http.ResponseWriter, r *http.Request, args []string) erro
 		return fmt.Errorf("expected 1 arguments got %d", len(args))
 	}
 
-	key := []byte(fmt.Sprintf("bookmark_%s", name))
-	if err := db.Delete(key); err != nil {
-		log.Printf("delete key failed: %s", err)
+	if err := bookmarks.Delete(name); err != nil {
 		return err
 	}
 

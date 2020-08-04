@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/pelletier/go-toml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -78,4 +80,78 @@ func TestBookmarkWithoutQuery(t *testing.T) {
 		w.Header().Get("Location"),
 		"https://www.google.com/",
 	)
+}
+
+func TestLoadBookmarks(t *testing.T) {
+	assert := assert.New(t)
+
+	test := map[string]string{
+		"one":   "https://one.com",
+		"two":   "https://two.com",
+		"three": "https://three.com",
+		"four":  "https://four.com",
+	}
+
+	data, err := toml.Marshal(test)
+	assert.Nil(err)
+	assert.Nil(ioutil.WriteFile("test.toml", data, 0666))
+
+	bookmarks, err = NewBookmarks("test.toml")
+	assert.Nil(err)
+
+	for k, v := range test {
+		bm, ok := bookmarks.Get(k)
+		assert.True(ok)
+		assert.Equal(k, bm.Name())
+		assert.Equal(v, bm.URL())
+	}
+}
+
+func TestSaveBookmarks(t *testing.T) {
+	assert := assert.New(t)
+
+	test := map[string]string{
+		"one":   "https://one.com",
+		"two":   "https://two.com",
+		"three": "https://three.com",
+		"four":  "https://four.com",
+	}
+
+	// clear file
+	assert.Nil(ioutil.WriteFile("test.toml", []byte(``), 0666))
+
+	var err error
+	bookmarks, err = NewBookmarks("test.toml")
+	assert.Nil(err)
+
+	for k, v := range test {
+		assert.Nil(bookmarks.Add(k, v))
+	}
+
+	var (
+		data []byte
+		bk   map[string]string
+	)
+	data, err = ioutil.ReadFile("test.toml")
+	assert.Nil(err)
+
+	err = toml.Unmarshal(data, &bk)
+	assert.Nil(err)
+	assert.Equal(test, bk)
+}
+
+func TestAddDefaultBookmarks(t *testing.T) {
+	assert := assert.New(t)
+
+	var err error
+	bookmarks, err = NewBookmarks("")
+	assert.Nil(err)
+	assert.Nil(bookmarks.addDefaults())
+
+	for k, v := range DefaultBookmarks {
+		bookmark, ok := bookmarks.Get(k)
+		assert.True(ok)
+		assert.Equal(k, bookmark.Name())
+		assert.Equal(v, bookmark.URL())
+	}
 }

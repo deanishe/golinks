@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/prologic/bitcask"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -69,11 +68,10 @@ func TestPingCommand(t *testing.T) {
 func TestListCommand(t *testing.T) {
 	assert := assert.New(t)
 
-	db, _ = bitcask.Open("test.db")
-	defer db.Close()
-
-	err := EnsureDefaultBookmarks()
+	var err error
+	bookmarks, err = NewBookmarks("")
 	assert.Nil(err)
+	assert.Nil(bookmarks.addDefaults())
 
 	cmd := List{}
 	assert.Equal(cmd.Name(), "list")
@@ -161,8 +159,9 @@ func TestDateCommand(t *testing.T) {
 func TestAddCommand(t *testing.T) {
 	assert := assert.New(t)
 
-	db, _ = bitcask.Open("test.db")
-	defer db.Close()
+	var err error
+	bookmarks, err = NewBookmarks("")
+	assert.Nil(err)
 
 	cmd := Add{}
 	assert.Equal(cmd.Name(), "add")
@@ -172,10 +171,10 @@ func TestAddCommand(t *testing.T) {
 	r, _ := http.NewRequest("GET", "?q=add", nil)
 
 	args := []string{"g", "https://www.google.com/search?q=%s&btnK"}
-	err := cmd.Exec(w, r, args)
+	err = cmd.Exec(w, r, args)
 	assert.Nil(err)
 
-	bookmark, ok := LookupBookmark("g")
+	bookmark, ok := bookmarks.Get("g")
 	assert.True(ok)
 
 	assert.Equal(bookmark.Name(), "g")
@@ -185,8 +184,10 @@ func TestAddCommand(t *testing.T) {
 func TestRemoveCommand(t *testing.T) {
 	assert := assert.New(t)
 
-	db, _ = bitcask.Open("test.db")
-	defer db.Close()
+	var err error
+	bookmarks, err = NewBookmarks("")
+	assert.Nil(err)
+	bookmarks.Add("imdb", "https://...")
 
 	cmd := Remove{}
 	assert.Equal(cmd.Name(), "remove")
@@ -196,10 +197,10 @@ func TestRemoveCommand(t *testing.T) {
 	r, _ := http.NewRequest("GET", "?q=remove", nil)
 
 	args := []string{"imdb"}
-	err := cmd.Exec(w, r, args)
+	err = cmd.Exec(w, r, args)
 	assert.Nil(err)
 
-	bookmark, ok := LookupBookmark("imdb")
+	bookmark, ok := bookmarks.Get("imdb")
 	assert.False(ok)
 
 	assert.Equal("", bookmark.Name())

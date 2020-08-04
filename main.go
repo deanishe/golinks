@@ -6,35 +6,33 @@ import (
 	"os"
 
 	"github.com/namsral/flag"
-	"github.com/prologic/bitcask"
 )
 
 var (
-	db  *bitcask.Bitcask
-	cfg Config
+	bookmarks *Bookmarks
+	cfg       Config
 )
 
 func main() {
 	var (
-		version    bool
-		config     string
-		dbpath     string
-		title      string
-		fqdn       string
-		bind       string
-		url        string
-		suggestURL string
+		version bool
+		config  string
+		dbpath  string
+		bmpath  string
+		bind    string
 	)
 
 	flag.BoolVar(&version, "v", false, "display version information")
 
+	flag.StringVar(&dbpath, "export", "", "export bookmarks from a legacy database")
+
 	flag.StringVar(&config, "config", "", "config file")
-	flag.StringVar(&dbpath, "dbpath", "search.db", "database path")
-	flag.StringVar(&title, "title", "Search", "OpenSearch title")
+	flag.StringVar(&bmpath, "bookmarks", "bookmarks.toml", "path to bookmarks file")
+	flag.StringVar(&cfg.Title, "title", "Search", "OpenSearch title")
 	flag.StringVar(&bind, "bind", "0.0.0.0:8000", "[int]:<port> to bind to")
-	flag.StringVar(&fqdn, "fqdn", "localhost:8000", "FQDN for public access")
-	flag.StringVar(&url, "url", DefaultURL, "default URL to redirect to")
-	flag.StringVar(&suggestURL, "suggest", DefaultSuggestURL,
+	flag.StringVar(&cfg.FQDN, "fqdn", "localhost:8000", "FQDN for public access")
+	flag.StringVar(&cfg.URL, "url", DefaultURL, "default URL to redirect to")
+	flag.StringVar(&cfg.SuggestURL, "suggest", DefaultSuggestURL,
 		"default URL to retrieve search suggestions from")
 
 	flag.Parse()
@@ -44,21 +42,21 @@ func main() {
 		os.Exit(0)
 	}
 
-	cfg.Title = title
-	cfg.FQDN = fqdn
-	cfg.URL = url
-	cfg.SuggestURL = suggestURL
+	if dbpath != "" {
+		if err := exportDatabase(dbpath); err != nil {
+			log.Fatal(err)
+		}
+		os.Exit(0)
+	}
 
 	var err error
-	db, err = bitcask.Open(dbpath)
+	bookmarks, err = NewBookmarks(bmpath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
-	if db.Len() == 0 {
-		err = EnsureDefaultBookmarks()
-		if err != nil {
+	if bookmarks.Len() == 0 {
+		if err := bookmarks.addDefaults(); err != nil {
 			log.Fatal(err)
 		}
 	}

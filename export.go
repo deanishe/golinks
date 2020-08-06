@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/pelletier/go-toml"
 	"github.com/prologic/bitcask"
+	yaml "gopkg.in/yaml.v2"
 )
 
-// Export legacy Bitcask database to TOML.
+// Export legacy Bitcask database to YAML.
 func exportDatabase(dbpath string) error {
 	var (
 		bookmarks = map[string]string{}
@@ -35,7 +35,7 @@ func exportDatabase(dbpath string) error {
 		return err
 	}
 
-	if data, err = toml.Marshal(bookmarks); err != nil {
+	if data, err = yaml.Marshal(bookmarks); err != nil {
 		return err
 	}
 

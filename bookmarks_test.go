@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/pelletier/go-toml"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
 )
 
 func TestZeroBookmark(t *testing.T) {
@@ -92,11 +92,11 @@ func TestLoadBookmarks(t *testing.T) {
 		"four":  "https://four.com",
 	}
 
-	data, err := toml.Marshal(test)
+	data, err := yaml.Marshal(test)
 	assert.Nil(err)
-	assert.Nil(ioutil.WriteFile("test.toml", data, 0666))
+	assert.Nil(ioutil.WriteFile("test.yml", data, 0666))
 
-	bookmarks, err = NewBookmarks("test.toml")
+	bookmarks, err = NewBookmarks("test.yml")
 	assert.Nil(err)
 
 	for k, v := range test {
@@ -118,10 +118,10 @@ func TestSaveBookmarks(t *testing.T) {
 	}
 
 	// clear file
-	assert.Nil(ioutil.WriteFile("test.toml", []byte(``), 0666))
+	assert.Nil(ioutil.WriteFile("test.yml", []byte(``), 0666))
 
 	var err error
-	bookmarks, err = NewBookmarks("test.toml")
+	bookmarks, err = NewBookmarks("test.yml")
 	assert.Nil(err)
 
 	for k, v := range test {
@@ -132,10 +132,10 @@ func TestSaveBookmarks(t *testing.T) {
 		data []byte
 		bk   map[string]string
 	)
-	data, err = ioutil.ReadFile("test.toml")
+	data, err = ioutil.ReadFile("test.yml")
 	assert.Nil(err)
 
-	err = toml.Unmarshal(data, &bk)
+	err = yaml.Unmarshal(data, &bk)
 	assert.Nil(err)
 	assert.Equal(test, bk)
 }

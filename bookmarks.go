@@ -9,7 +9,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/pelletier/go-toml"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // Bookmarks contains user bookmarks.
@@ -109,7 +109,7 @@ func (bm *Bookmarks) load() error {
 		return err
 	}
 
-	if err = toml.Unmarshal(data, &bm.bookmarks); err != nil {
+	if err = yaml.Unmarshal(data, &bm.bookmarks); err != nil {
 		return err
 	}
 	return nil
@@ -121,7 +121,7 @@ func (bm *Bookmarks) save() error {
 		return nil
 	}
 
-	data, err := toml.Marshal(bm.bookmarks)
+	data, err := yaml.Marshal(bm.bookmarks)
 	if err != nil {
 		return err
 	}

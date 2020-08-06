@@ -27,7 +27,7 @@ func main() {
 	flag.StringVar(&dbpath, "export", "", "export bookmarks from a legacy database")
 
 	flag.StringVar(&config, "config", "", "config file")
-	flag.StringVar(&bmpath, "bookmarks", "bookmarks.toml", "path to bookmarks file")
+	flag.StringVar(&bmpath, "bookmarks", "bookmarks.yml", "path to bookmarks file")
 	flag.StringVar(&cfg.Title, "title", "Search", "OpenSearch title")
 	flag.StringVar(&bind, "bind", "0.0.0.0:8000", "[int]:<port> to bind to")
 	flag.StringVar(&cfg.FQDN, "fqdn", "localhost:8000", "FQDN for public access")

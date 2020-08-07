@@ -95,7 +95,7 @@ Use `list` to see all your bookmarks and commands (golinks comes with several us
 
 ## Configuration
 
-golinks comes with sensible defaults, so it will run out-of-the box without any configuration (just run `golinks` and it will be available at `http://localhost:8000`, and save your custom bookmarks to `search.db` in the working directory), but there are several knobs you can tweak.
+golinks comes with sensible defaults, so it will run out-of-the box without any configuration (just run `golinks` and it will be available at `http://localhost:8000`, and save your custom bookmarks to `bookmarks.yml` in the working directory), but there are several knobs you can tweak.
 
 All configuration options can be specified via command-line flag, environment variable or a configuration file.
 

@@ -3,6 +3,7 @@ module github.com/prologic/golinks
 require (
 	github.com/GeertJohan/go.rice v1.0.0
 	github.com/NYTimes/gziphandler v1.0.1
+	github.com/fsnotify/fsnotify v1.4.7
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/namsral/flag v1.7.4-pre
 	github.com/prologic/bitcask v0.3.4

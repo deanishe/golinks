@@ -20,6 +20,7 @@ func main() {
 		dbpath  string
 		bmpath  string
 		bind    string
+		watch   bool
 	)
 
 	flag.BoolVar(&version, "v", false, "display version information")
@@ -34,6 +35,7 @@ func main() {
 	flag.StringVar(&cfg.URL, "url", DefaultURL, "default URL to redirect to")
 	flag.StringVar(&cfg.SuggestURL, "suggest", DefaultSuggestURL,
 		"default URL to retrieve search suggestions from")
+	flag.BoolVar(&watch, "watch", false, "monitor bookmarks file for changes")
 
 	flag.Parse()
 
@@ -59,6 +61,13 @@ func main() {
 		if err := bookmarks.addDefaults(); err != nil {
 			log.Fatal(err)
 		}
+	}
+
+	if watch {
+		if err := bookmarks.startWatching(); err != nil {
+			log.Fatal(err)
+		}
+		defer bookmarks.stopWatching()
 	}
 
 	NewServer(bind, cfg).ListenAndServe()

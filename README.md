@@ -105,12 +105,13 @@ The available CLI flags are (as shown via `golinks -h`):
 |--------------|-------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
 | `-bind`      | `0:0:0:0:8000`                                                          | IP and port to bind server to.                                                        |
 | `-fqdn`      | `localhost:8000`                                                        | Web address that corresponds to bind address.                                         |
-| `-bookmarks` | `bookmarks.yml`                                                        | YAML file to save your custom bookmarks to.                                           |
+| `-bookmarks` | `bookmarks.yml`                                                         | YAML file to save your custom bookmarks to.                                           |
 | `-suggest`   | `https://suggestqueries.google.com/complete/search?client=firefox&q=%s` | URL of autosuggest service to retrieve search suggestions from.                       |
 | `-title`     | `Search`                                                                | The OpenSearch service title (i.e. what your browser will call golinks' search).      |
 | `-url`       | `https://www.google.com/search?q=%s&btnK`                               | The URL golinks will redirect searches to by default (if no custom bookmark matches). |
-| `-config`    |                                                                         | Path to the optional configuration file (see [below](#configuration-file)).                                  |
+| `-config`    |                                                                         | Path to the optional configuration file (see [below](#configuration-file)).           |
 | `-export`    |                                                                         | Export legacy bookmarks from a legacy database (see [Upgrading](#upgrading)).         |
+| `-watch`     | Monitor bookmarks file and reload it if it changes                                                                        |                                                                                       |
 | `-h`         |                                                                         | Show CLI help and exit.                                                               |
 | `-v`         |                                                                         | Show golinks version number and exit.                                                 |
 

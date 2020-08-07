@@ -4,11 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"sort"
 	"sync"
 
+	"github.com/fsnotify/fsnotify"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -16,7 +18,12 @@ import (
 type Bookmarks struct {
 	filename  string
 	bookmarks map[string]string
-	mu        *sync.RWMutex
+	mu        *sync.RWMutex // lock around access to bookmarks
+
+	saving  bool // tell watcher to ignore write events
+	watcher *fsnotify.Watcher
+
+	reloaded chan struct{} // test hook
 }
 
 // NewBookmarks loads bookmarks from a file (if it exists).
@@ -109,6 +116,7 @@ func (bm *Bookmarks) load() error {
 		return err
 	}
 
+	bm.bookmarks = map[string]string{}
 	if err = yaml.Unmarshal(data, &bm.bookmarks); err != nil {
 		return err
 	}
@@ -121,6 +129,7 @@ func (bm *Bookmarks) save() error {
 		return nil
 	}
 
+	bm.saving = true
 	data, err := yaml.Marshal(bm.bookmarks)
 	if err != nil {
 		return err
@@ -137,6 +146,57 @@ func (bm *Bookmarks) addDefaults() error {
 		bm.bookmarks[k] = v
 	}
 	return bm.save()
+}
+
+func (bm *Bookmarks) startWatching() error {
+	var err error
+	if bm.watcher, err = fsnotify.NewWatcher(); err != nil {
+		return err
+	}
+
+	go func() {
+		for {
+			select {
+			case ev, ok := <-bm.watcher.Events:
+				if !ok {
+					return
+				}
+
+				if ev.Op&fsnotify.Write == fsnotify.Write {
+					if bm.saving {
+						bm.saving = false
+						continue
+					}
+
+					if err := bm.load(); err != nil {
+						log.Printf("error reloading %q: %v", bm.filename, err)
+					} else {
+						log.Println("reloaded", bm.filename)
+					}
+
+					// signal unit test
+					if bm.reloaded != nil {
+						bm.reloaded <- struct{}{}
+					}
+				}
+
+			case err, ok := <-bm.watcher.Errors:
+				if !ok {
+					return
+				}
+				log.Printf("error watching %q: %v", bm.filename, err)
+			}
+		}
+	}()
+
+	return bm.watcher.Add(bm.filename)
+}
+
+func (bm *Bookmarks) stopWatching() error {
+	if bm.watcher != nil {
+		return bm.watcher.Close()
+	}
+	return nil
 }
 
 // Bookmark ...

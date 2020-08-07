@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
@@ -154,4 +155,76 @@ func TestAddDefaultBookmarks(t *testing.T) {
 		assert.Equal(k, bookmark.Name())
 		assert.Equal(v, bookmark.URL())
 	}
+}
+
+func TestWatchBookmarks(t *testing.T) {
+	assert := assert.New(t)
+
+	test := map[string]string{
+		"one":   "https://one.com",
+		"two":   "https://two.com",
+		"three": "https://three.com",
+		"four":  "https://four.com",
+	}
+
+	// clear file
+	assert.Nil(ioutil.WriteFile("test.yml", []byte(``), 0666))
+
+	var (
+		data []byte
+		err  error
+	)
+	bookmarks, err = NewBookmarks("test.yml")
+	assert.Nil(err)
+	bookmarks.reloaded = make(chan struct{})
+
+	// sanity check
+	assert.Equal(0, len(bookmarks.All()))
+
+	err = bookmarks.startWatching()
+	assert.Nil(err)
+	defer bookmarks.stopWatching()
+
+	data, err = yaml.Marshal(test)
+	assert.Nil(err)
+	assert.Nil(ioutil.WriteFile("test.yml", data, 0666))
+
+	select {
+	case <-bookmarks.reloaded:
+		break
+	case <-time.After(time.Second):
+		t.Fail()
+		break
+	}
+
+	assert.Equal(len(test), len(bookmarks.All()))
+	for k, v := range test {
+		bk, ok := bookmarks.Get(k)
+		assert.True(ok)
+		assert.Equal(v, bk.url)
+	}
+
+	// delete a bookmark from test.yml
+	delete(test, "four")
+	data, err = yaml.Marshal(test)
+	assert.Nil(err)
+	assert.Nil(ioutil.WriteFile("test.yml", data, 0666))
+
+	select {
+	case <-bookmarks.reloaded:
+		break
+	case <-time.After(time.Second):
+		t.Fail()
+		break
+	}
+
+	assert.Equal(len(test), len(bookmarks.All()))
+	for k, v := range test {
+		bk, ok := bookmarks.Get(k)
+		assert.True(ok)
+		assert.Equal(v, bk.url)
+	}
+
+	err = bookmarks.stopWatching()
+	assert.Nil(err)
 }

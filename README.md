@@ -115,6 +115,7 @@ The available CLI flags are (as shown via `golinks -h`):
 | `-h`         |                                                                         | Show CLI help and exit.                                                               |
 | `-v`         |                                                                         | Show golinks version number and exit.                                                 |
 
+
 ### Environment variables
 
 All the above flags can also be specified via environment variable with the same name as the flag, but in uppercase. So `BIND=127.0.0.1:8081 FQDN=localhost:8081 golinks` is equivalent to `golinks -bind 127.0.0.1:8081 -fqdn localhost:8081`.
@@ -150,6 +151,7 @@ url https://duckduckgo.com/?q=%s
 suggest https://duckduckgo.com/ac/?type=list&q=%s
 ```
 
+
 ## Upgrading
 
 Version 0.0.5 and earlier stored bookmarks in a Bitcask database, instead of a YAML file. Use the `-export` flag to dump the contents of such a database to the new format:
@@ -160,7 +162,6 @@ golinks -export /path/to/search.db
 # dump bookmarks to new bookmarks file
 golinks -export /path/to/search.db > bookmarks.yml
 ```
-
 
 ## Stargazers over time
 
